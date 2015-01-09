@@ -26,10 +26,11 @@ li:hover {
   background-color: #eee;
 }
 
-.selected, .selected:hover {
+.selected {
   cursor: default;
   background-color: #ddd;
   color: red;
+  width: 220px;
 }
 
 .error {
@@ -38,5 +39,5 @@ li:hover {
 }
 
 .initial {
-  font-weight: bold;
+  font-weight: regular;
 }
