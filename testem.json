@@ -1,0 +1,19 @@
+{
+	"framework": "mocha+chai",
+	"src_files": [
+		"development/spec/spec.js"
+	],
+	"launchers": {
+		"node": {
+			"command": "./node_modules/.bin/mocha -r spec/config/setup.js -R tap development/spec/*.js",
+			"protocol": "tap"
+		}
+	},
+	"launch_in_dev": [
+		"phantomjs",
+		"chrome"
+	],
+	"launch_in_ci": [
+		"phantomjs"
+	]
+}
