@@ -20,6 +20,7 @@
 			}
 		}
 	};
+
 	var mReuseModule = function (templateModule, config) {
 		var mod = Object.create(templateModule);
 		mod.controller = mod.controller.bind(mod.controller, config);
@@ -27,13 +28,6 @@
 	};
 
 	var module = {};
-
-	module.eventHandlers = function (ctrl) {
-		return{
-			onmouseover: ctrl.onmouseover,
-			onmouseout: ctrl.onmouseout
-		};
-	};
 
 	module.controller = function (config) {
 		var self = this;
@@ -56,8 +50,9 @@
 
 	module.getView = function (ctrl) {
 		var arrView = [];
-		for (var i = 0, len = 10; i < len; i++) {
-			arrView.push(m('div.initial', module.eventHandlers(ctrl), ctrl.message + "-" + i));
+		for (var i = 0, len = 100; i < len; i++) {
+			arrView.push(m('div.initial', {onmouseover: ctrl.onmouseover,
+				onmouseout: ctrl.onmouseout}, ctrl.message + "-" + i));
 		}
 		return arrView;
 	};
