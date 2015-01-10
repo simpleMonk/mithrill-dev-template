@@ -20,27 +20,44 @@
 			}
 		}
 	};
+	var mReuseModule = function (templateModule, config) {
+		var mod = Object.create(templateModule);
+		mod.controller = mod.controller.bind(mod.controller, config);
+		return mod;
+	};
 
 	var module = {};
 
-	module.controller = function () {
-		this.message = "Hello World from Mithril!";
+	module.eventHandlers = function (ctrl) {
+		return{
+			onmouseover: ctrl.onmouseover,
+			onmouseout: ctrl.onmouseout
+		};
 	};
 
+	module.controller = function (config) {
+		var self = this;
 
-	var eventHandlers = {
-		onmouseover: function (event) {
-			$c.addClass(event.toElement, "selected");
-		},
-		onmouseout: function (event) {
-			$c.removeClass(event.fromElement, 'selected');
-		}
+		console.log("config", config);
+
+		this.config = config || {};
+
+		this.message = "Hello World from Mithril!";
+
+		this.onmouseover = function (event) {
+			$c.addClass(event.toElement, self.config.className || 'selected');
+		};
+		this.onmouseout = function (event) {
+			$c.removeClass(event.fromElement, self.config.className || 'selected');
+		};
+
+		return this;
 	};
 
 	module.getView = function (ctrl) {
 		var arrView = [];
 		for (var i = 0, len = 10; i < len; i++) {
-			arrView.push(m('div.initial', eventHandlers, ctrl.message + "-" + i));
+			arrView.push(m('div.initial', module.eventHandlers(ctrl), ctrl.message + "-" + i));
 		}
 		return arrView;
 	};
@@ -49,7 +66,9 @@
 		return module.getView(ctrl);
 	};
 
-	m.module(document.getElementById('hello'), module);
+	m.module(document.getElementById('hello'), mReuseModule(module, {}));
+	m.module(document.getElementById('hello-1'), mReuseModule(module, {className: 'selected-mod'}));
+
 
 })();
 
