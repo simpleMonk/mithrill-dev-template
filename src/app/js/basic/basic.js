@@ -29,40 +29,59 @@
 
 	var module = {};
 
-	module.controller = function (config) {
-		var self = this;
-
-		console.log("config", config);
-
-		this.config = config || {};
-
-		this.message = "Hello World from Mithril!";
-
-		this.onmouseover = function (event) {
-			$c.addClass(event.toElement, self.config.className || 'selected');
-		};
-		this.onmouseout = function (event) {
-			$c.removeClass(event.fromElement, self.config.className || 'selected');
-		};
-
-		return this;
+	module.taskModel = function (data) {
+		this.description = m.prop(data.description);
+		this.isCompleted = m.prop(data.isCompleted || false);
 	};
 
-	module.getView = function (ctrl) {
-		var arrView = [];
-		for (var i = 0, len = 100; i < len; i++) {
-			arrView.push(m('div.initial', {onmouseover: ctrl.onmouseover,
-				onmouseout: ctrl.onmouseout}, ctrl.message + "-" + i));
-		}
-		return arrView;
+	module.controller = function () {
+		this.rawTasks = [
+			{ description: 'Task1', isCompleted: true},
+			{ description: 'Task2', isCompleted: false},
+			{ description: 'Task3', isCompleted: false}
+		];
+
+		this.inputTask = {
+			description: m.prop('My Placeholder')
+		};
+
+		this.tasks = this.rawTasks.map(function (task) {
+			return new module.taskModel(task);
+		});
+
+		this.addNewTodo = function (event) {
+			if (event.which != 13) {
+				return;
+			}
+			this.tasks.push(new module.taskModel({description: this.inputTask.description(), isCompleted: false}));
+			this.inputTask.description('');
+		};
+
+		this.completeTodo = function (todo, index, event) {
+			todo.isCompleted(true);
+		};
+
+
 	};
+
+	function getNewTodo(ctrl) {
+		return [m('input#new-todo[placeholder="What needs to be done?"]',
+			{value: ctrl.inputTask.description(),
+				oninput: m.withAttr('value', ctrl.inputTask.description),
+				onkeydown: ctrl.addNewTodo.bind(ctrl)}),
+			m('div', ctrl.inputTask.description())];
+	}
+
 
 	module.view = function (ctrl) {
-		return module.getView(ctrl);
+		return [getNewTodo(ctrl), ctrl.tasks.map(function (todo, index) {
+			return m('div', {class: todo.isCompleted() ? 'done' : 'active', onclick: ctrl.completeTodo.bind(ctrl, todo, index)}, todo.description() + '-' + todo.isCompleted());
+		})];
+
 	};
 
-	m.module(document.getElementById('hello'), mReuseModule(module, {}));
-	m.module(document.getElementById('hello-1'), mReuseModule(module, {className: 'selected-mod'}));
+
+	m.module(document.getElementById('hello'), module);
 
 
 })();
