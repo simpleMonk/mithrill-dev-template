@@ -30,7 +30,7 @@ gulp.task('copy-all-files', function (cb) {
 
 gulp.task('copy-js-files', function () {
 	var vendorFiles = config.vendorjs;
-	var tsFiles = [config.src + "/app/**/*.ts"];
+	var tsFiles = [config.src + "/app/**/*.ts","./typings/**/*.d.ts"];
 	gulpMerge(
 		gulp.src(vendorFiles),
 		gulp.src(tsFiles)

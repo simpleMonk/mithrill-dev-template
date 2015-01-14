@@ -10,6 +10,9 @@
     },
     "chai/chai.d.ts": {
       "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
+    },
+    "mithril/mithril.d.ts": {
+      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
     }
   }
 }
