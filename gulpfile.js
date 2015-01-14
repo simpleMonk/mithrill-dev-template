@@ -11,6 +11,8 @@ var sass = require('gulp-sass');
 var uglify = require('gulp-uglify');
 var gzip = require('gulp-gzip');
 var minifyCSS = require('gulp-minify-css');
+var gulpMerge = require('gulp-merge');
+var ts = require('gulp-typescript');
 
 
 var config = require('./tasks/config.js');
@@ -26,12 +28,16 @@ gulp.task('copy-all-files', function (cb) {
 	runSequence('copy-js-files', 'copy-style', 'copy-html', 'copy-spec-files', cb);
 });
 
-gulp.task('copy-js-files', ['lint-js-files'], function () {
-	var srcFiles = config.vendorjs;
-	srcFiles.push(config.src + "/app/**/*.js");
-	//srcFiles.push("!./spec/**/*.js");
-
-	gulp.src(srcFiles)
+gulp.task('copy-js-files', function () {
+	var vendorFiles = config.vendorjs;
+	var tsFiles = [config.src + "/app/**/*.ts"];
+	gulpMerge(
+		gulp.src(vendorFiles),
+		gulp.src(tsFiles)
+			.pipe(ts({
+				declarationFiles: true,
+				noExternalResolve: true
+			})))
 		//.pipe(uglify())
 		.pipe(concat("bundle.js"))
 		.pipe(gulp.dest(config.development))
@@ -44,15 +50,24 @@ gulp.task('copy-js-files', ['lint-js-files'], function () {
 		});
 });
 
-gulp.task('copy-spec-files', ['lint-spec-files', 'copy-fixtures'], function () {
+gulp.task('copy-spec-files', function () {
 	var specFiles = [];
 	for (var i = 0; i < config.vendorjs.length; i++) {
 		specFiles.push(config.vendorjs[i]);
 	}
-	specFiles.push(config.src + "/app/**/*.js");
-	specFiles.push("./spec/**/*.js");
 
-	gulp.src(specFiles)
+	var specTsFiles = [];
+	specTsFiles.push(config.src + "/app/**/*.ts");
+	specTsFiles.push("./typings/**/*.d.ts");
+	specTsFiles.push("./spec/**/*.ts");
+
+	gulpMerge(
+		gulp.src(specFiles),
+		gulp.src(specTsFiles)
+			.pipe(ts({
+				declarationFiles: true,
+				noExternalResolve: true
+			})))
 		.pipe(concat("spec.js"))
 		.pipe(gulp.dest(config.development + "/spec"))
 		.pipe(connect.reload())
@@ -62,25 +77,6 @@ gulp.task('copy-spec-files', ['lint-spec-files', 'copy-fixtures'], function () {
 		.on('error', function (err) {
 			gutil.log(err);
 		});
-});
-
-gulp.task('lint-js-files', function () {
-	gulp.src(config.src + "/app/**/*.js")
-		.pipe(jshint())
-		.pipe(jshint.reporter('jshint-stylish'));
-
-});
-
-gulp.task('lint-spec-files', function () {
-	var lintSpecFiles = [];
-	lintSpecFiles.push(config.src + "/app/**/*.js");
-	lintSpecFiles.push("!./spec/config/**");
-	lintSpecFiles.push(config.spec + "/**/*.js");
-
-	gulp.src(lintSpecFiles)
-		.pipe(jshint())
-		.pipe(jshint.reporter('jshint-stylish'));
-
 });
 
 gulp.task('copy-style', function () {
@@ -110,18 +106,6 @@ gulp.task('copy-html', function () {
 		.pipe(connect.reload())
 		.on('end', function () {
 			gutil.log('successfully copied index.html');
-		})
-		.on('error', function (err) {
-			gutil.log(err);
-		});
-});
-
-gulp.task('copy-fixtures', function () {
-	gulp.src(config.spec + "/**/*.html")
-		.pipe(gulp.dest(config.development + "/spec"))
-		.pipe(connect.reload())
-		.on('end', function () {
-			gutil.log('successfully copied fixtures');
 		})
 		.on('error', function (err) {
 			gutil.log(err);

@@ -8,7 +8,8 @@ var config = {
 	"vendorjs": [
 		"./src/vendor/js/mithril.js"
 	],
-	"spec": "./spec"
+	"spec": "./spec",
+	"tsdefinition":"./typings"
 
 };
 
